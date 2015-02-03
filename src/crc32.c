@@ -75,14 +75,24 @@ static const uint32_t crc32tab[256] = {
     0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d,
 };
 
-uint32_t hash_crc32(const char *key, size_t key_length)
-{
+static uint32_t _hash_crc32(const char *key, size_t key_length) {
     uint64_t x;
     uint32_t crc = UINT32_MAX;
 
     for (x = 0; x < key_length; x++) {
         crc = (crc >> 8) ^ crc32tab[(crc ^ (uint64_t)key[x]) & 0xff];
     }
+    return crc;
+}
+uint32_t hash_crc32(const char *key, size_t key_length)
+{
+    return (_hash_crc32(key, key_length) ^ 0xFFFFFFFF);
+}
 
-    return (crc ^ 0xFFFFFFFF);
+/*
+    Client compatible hash_crc32
+*/
+uint32_t client_hash_crc32(const char *key, size_t key_length)
+{
+    return ((~_hash_crc32(key, key_length)) >> 16) & 0x7fff; // moxi/lcb etc... do this
 }

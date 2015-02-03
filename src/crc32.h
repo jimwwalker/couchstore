@@ -9,6 +9,8 @@ extern "C" {
 
     uint32_t hash_crc32(const char *key, size_t key_length);
 
+    /* client compatible hash_crc32 */
+    uint32_t client_hash_crc32(const char *key, size_t key_length);
 #ifdef __cplusplus
 }
 #endif
