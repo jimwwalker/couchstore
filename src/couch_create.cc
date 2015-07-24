@@ -42,6 +42,7 @@
 #include <condition_variable>
 #include <chrono>
 #include <set>
+#include <random>
 
 using namespace std;
 
@@ -477,9 +478,9 @@ public:
         // generate doc body only if size has changed.
         if (doc_created != dlen) {
             if (parameters.is_low_compression()) {
-                srand(0);
+                mt19937 twister(dlen);
                 for (int data_index = 0; data_index < dlen; data_index++) {
-                    char data_value = (rand() % 255) % ('Z' - '0');
+                    char data_value = (twister() % 255) % ('Z' - '0');
                     data[data_index] = data_value + '0';
                 }
             } else {

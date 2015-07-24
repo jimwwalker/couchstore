@@ -13,7 +13,9 @@
 #include "config.h"
 
 #define COUCH_BLOCK_SIZE 4096
-#define COUCH_DISK_VERSION 11
+#define COUCH_DISK_VERSION_11 11
+#define COUCH_DISK_VERSION_12 12
+#define COUCH_DISK_VERSION COUCH_DISK_VERSION_12
 #define COUCH_SNAPPY_THRESHOLD 64
 #define MAX_DB_HEADER_SIZE 1024    /* Conservative estimate; just for sanity check */
 
@@ -30,6 +32,12 @@ enum {
     COUCHSTORE_INCLUDE_CORRUPT_DOCS = 0x40000000
 };
 
+typedef enum  {
+    UNKNOWN,
+    CRC32C,
+    CRC32
+} crc32_method;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -41,6 +49,8 @@ extern "C" {
         couch_file_handle handle;
         const char* path;
         couchstore_error_info_t lastError;
+        crc32_method crc32;
+        crc32_method crc32_alt;
     } tree_file;
 
     typedef struct _nodepointer {

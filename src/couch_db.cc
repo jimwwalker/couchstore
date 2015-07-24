@@ -13,6 +13,8 @@
 #include "reduces.h"
 #include "util.h"
 
+#include <iostream>
+
 #define ROOT_BASE_SIZE 12
 #define HEADER_BASE_SIZE 25
 
@@ -63,8 +65,26 @@ static couchstore_error_t find_header_at_pos(Db *db, cs_off_t pos)
 
     db->header.position = pos;
     db->header.disk_version = decode_raw08(header_buf.raw->version);
-    error_unless(db->header.disk_version == COUCH_DISK_VERSION,
+
+    // Currently can read/write 11 and 12
+    // 11 uses hash_crc32
+    // 12 uses platform crc32c (for speed)
+    error_unless(db->header.disk_version == COUCH_DISK_VERSION_11
+                 || db->header.disk_version == COUCH_DISK_VERSION_12,
                  COUCHSTORE_ERROR_HEADER_VERSION);
+
+    if (db->header.disk_version >= COUCH_DISK_VERSION_12) {
+
+        // The primary CRC for v12 is CRC-32C
+        db->file.crc32 = CRC32C;
+        db->file.crc32_alt = CRC32;
+    } else {
+
+        // The primary CRC for v11
+        db->file.crc32 = CRC32;
+        db->file.crc32_alt = UNKNOWN;
+    }
+
     db->header.update_seq = decode_raw48(header_buf.raw->update_seq);
     db->header.purge_seq = decode_raw48(header_buf.raw->purge_seq);
     db->header.purge_ptr = decode_raw48(header_buf.raw->purge_ptr);

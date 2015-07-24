@@ -10,7 +10,7 @@
 #include "rfc1321/global.h"
 #include "rfc1321/md5.h"
 #include "internal.h"
-#include "crc32.h"
+#include "crc32_select.h"
 #include "util.h"
 
 static ssize_t raw_write(tree_file *file, const sized_buf *buf, cs_off_t pos)
@@ -53,7 +53,10 @@ couchstore_error_t write_header(tree_file *file, sized_buf *buf, cs_off_t *pos)
     cs_off_t write_pos = file->pos;
     ssize_t written;
     uint32_t size = htonl(buf->size + 4); //Len before header includes hash len.
-    uint32_t crc32 = htonl(hash_crc32(buf->buf, buf->size));
+    uint32_t crc = htonl(crc32(reinterpret_cast<const uint8_t*>(buf->buf),
+                               buf->size,
+                               file->crc32));
+
     char headerbuf[1 + 4 + 4];
 
     if (write_pos % COUCH_BLOCK_SIZE != 0) {
@@ -64,7 +67,7 @@ couchstore_error_t write_header(tree_file *file, sized_buf *buf, cs_off_t *pos)
     // Write the header's block header
     headerbuf[0] = 1;
     memcpy(&headerbuf[1], &size, 4);
-    memcpy(&headerbuf[5], &crc32, 4);
+    memcpy(&headerbuf[5], &crc, 4);
 
     written = file->ops->pwrite(&file->lastError, file->handle,
                                 &headerbuf, sizeof(headerbuf), write_pos);
@@ -90,12 +93,14 @@ int db_write_buf(tree_file *file, const sized_buf *buf, cs_off_t *pos, size_t *d
     cs_off_t end_pos = write_pos;
     ssize_t written;
     uint32_t size = htonl(buf->size | 0x80000000);
-    uint32_t crc32 = htonl(hash_crc32(buf->buf, buf->size));
+    uint32_t crc = htonl(crc32(reinterpret_cast<const uint8_t*>(buf->buf),
+                               buf->size,
+                               file->crc32));
     char headerbuf[4 + 4];
 
     // Write the buffer's header:
     memcpy(&headerbuf[0], &size, 4);
-    memcpy(&headerbuf[4], &crc32, 4);
+    memcpy(&headerbuf[4], &crc, 4);
 
     sized_buf sized_headerbuf = { headerbuf, 8 };
     written = raw_write(file, &sized_headerbuf, end_pos);

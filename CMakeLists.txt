@@ -39,23 +39,49 @@ ELSE(WIN32)
   SET(COUCHSTORE_FILE_OPS "src/os.c")
 ENDIF(WIN32)
 
-SET(COUCHSTORE_SOURCES src/arena.cc src/bitfield.c src/btree_modify.cc
-            src/btree_read.cc src/couch_db.cc src/couch_file_read.cc
-            src/couch_file_write.cc src/couch_save.cc src/crc32.c
-            src/db_compact.cc src/file_merger.cc src/file_name_utils.c
-            src/file_sorter.cc src/iobuffer.cc src/llmsort.cc
-            src/mergesort.cc src/node_types.cc src/reduces.cc
-            src/rfc1321/md5c.c src/strerror.cc src/tree_writer.cc
-            src/util.cc src/views/bitmap.c src/views/collate_json.c
-            src/views/file_merger.c src/views/file_sorter.c
-            src/views/index_header.c src/views/keys.c
-            src/views/mapreduce/mapreduce.cc
-            src/views/mapreduce/mapreduce_c.cc src/views/reducers.c
-            src/views/reductions.c src/views/sorted_list.c
-            src/views/spatial.c src/views/spatial_modify.c
-            src/views/util.c src/views/values.c
-            src/views/view_group.c src/views/purgers.c
-            src/views/compaction.c src/quicksort.c ${COUCHSTORE_FILE_OPS})
+SET(COUCHSTORE_SOURCES  src/arena.cc
+                        src/bitfield.c
+                        src/btree_modify.cc
+                        src/btree_read.cc
+                        src/couch_db.cc
+                        src/couch_file_read.cc
+                        src/couch_file_write.cc
+                        src/couch_save.cc
+                        src/crc32.c
+                        src/crc32_select.cc
+                        src/db_compact.cc
+                        src/file_merger.cc
+                        src/file_name_utils.c
+                        src/file_sorter.cc
+                        src/iobuffer.cc
+                        src/llmsort.cc
+                        src/mergesort.cc
+                        src/node_types.cc
+                        src/reduces.cc
+                        src/rfc1321/md5c.c
+                        src/strerror.cc
+                        src/tree_writer.cc
+                        src/util.cc
+                        src/views/bitmap.c
+                        src/views/collate_json.c
+                        src/views/file_merger.c
+                        src/views/file_sorter.c
+                        src/views/index_header.c
+                        src/views/keys.c
+                        src/views/mapreduce/mapreduce.cc
+                        src/views/mapreduce/mapreduce_c.cc
+                        src/views/reducers.c
+                        src/views/reductions.c
+                        src/views/sorted_list.c
+                        src/views/spatial.c
+                        src/views/spatial_modify.c
+                        src/views/util.c
+                        src/views/values.c
+                        src/views/view_group.c
+                        src/views/purgers.c
+                        src/views/compaction.c
+                        src/quicksort.c
+                        ${COUCHSTORE_FILE_OPS})
 SET(COUCHSTORE_LIBRARIES ${V8_LIBRARIES} ${ICU_LIBRARIES} ${SNAPPY_LIBRARIES} platform)
 
 ADD_LIBRARY(couchstore SHARED ${COUCHSTORE_SOURCES})
@@ -184,10 +210,14 @@ ADD_EXECUTABLE(couchstore_testapp tests/testapp.c
 	tests/btree_purge/tests.c
 	tests/btree_purge/purge.c
         ${COUCHSTORE_SOURCES} )
+
 SET_TARGET_PROPERTIES(couchstore_testapp PROPERTIES
                       COMPILE_FLAGS "-DLIBCOUCHSTORE_NO_VISIBILITY=1 -DTESTAPP=1")
 
 TARGET_LINK_LIBRARIES(couchstore_testapp ${COUCHSTORE_LIBRARIES})
 ADD_TEST(couchstore-testapp couchstore_testapp)
+
+ADD_EXECUTABLE(crc32_bench tests/crc32_bench.cc src/crc32.c)
+TARGET_LINK_LIBRARIES(crc32_bench platform)
 
 ADD_SUBDIRECTORY(programs)

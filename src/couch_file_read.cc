@@ -9,9 +9,9 @@
 #include "internal.h"
 #include "iobuffer.h"
 #include "bitfield.h"
-#include "crc32.h"
+#include "crc32_select.h"
 #include "util.h"
-
+#include <iostream>
 
 couchstore_error_t tree_file_open(tree_file* file,
                                   const char *filename,
@@ -42,6 +42,10 @@ couchstore_error_t tree_file_open(tree_file* file,
 
     error_pass(file->ops->open(&file->lastError, &file->handle,
                                filename, openflags));
+
+    // select default CRC32, this may change if header is discovered for older file version
+    file->crc32 = CRC32C;
+    file->crc32_alt = CRC32;
 
 cleanup:
     if (errcode != COUCHSTORE_SUCCESS) {
@@ -130,8 +134,19 @@ static int pread_bin_internal(tree_file *file,
         return COUCHSTORE_ERROR_ALLOC_FAIL;
     }
     err = read_skipping_prefixes(file, &pos, info.chunk_len, buf);
-    if (!err && info.crc32 && info.crc32 != hash_crc32(buf, info.chunk_len)) {
-        err = COUCHSTORE_ERROR_CHECKSUM_FAIL;
+    if (!err && info.crc32 && info.crc32 != crc32(reinterpret_cast<const uint8_t*>(buf),
+                                                  info.chunk_len,
+                                                  file->crc32)) {
+
+        // We could be reading the header, in which case we don't know
+        // the correct CRC to use. Re-do the CRC with the alternate CRC.
+        if (info.crc32 != crc32(reinterpret_cast<const uint8_t*>(buf),
+                                                  info.chunk_len,
+                                                  file->crc32_alt)) {
+            // if both CRCs failed it's a real problem.
+            err = COUCHSTORE_ERROR_CHECKSUM_FAIL;
+        }
+
     }
     if (err < 0) {
         free(buf);
