@@ -11,9 +11,12 @@
 
 #include <libcouchstore/couch_db.h>
 #include "config.h"
+#include "crc32.h"
 
 #define COUCH_BLOCK_SIZE 4096
-#define COUCH_DISK_VERSION 11
+#define COUCH_DISK_VERSION_11 11
+#define COUCH_DISK_VERSION_12 12
+#define COUCH_DISK_VERSION COUCH_DISK_VERSION_12
 #define COUCH_SNAPPY_THRESHOLD 64
 #define MAX_DB_HEADER_SIZE 1024    /* Conservative estimate; just for sanity check */
 
@@ -41,6 +44,7 @@ extern "C" {
         couch_file_handle handle;
         const char* path;
         couchstore_error_info_t lastError;
+        crc_mode_e crc_mode;
     } tree_file;
 
     typedef struct _nodepointer {

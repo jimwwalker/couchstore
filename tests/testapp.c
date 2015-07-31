@@ -22,6 +22,7 @@ extern void view_tests();
 extern void purge_tests();
 
 int main() {
+
     file_merger_tests();
     file_deduper_tests();
     file_sorter_tests();

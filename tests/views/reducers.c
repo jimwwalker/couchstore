@@ -1684,6 +1684,9 @@ static void test_view_btree_large_reducer(void)
     cb_assert(transient_arena != NULL && persistent_arena != NULL);
     ret = tree_file_open(&index_file, dst_file, O_CREAT | O_RDWR,
         couchstore_get_default_file_ops());
+
+    // bypassing the interface here so set the CRC
+    index_file.crc_mode = CRC32C;
     cb_assert(ret == COUCHSTORE_SUCCESS);
     mr = new_btree_modres(persistent_arena,
             transient_arena,

@@ -1,16 +1,30 @@
-#ifndef COUCHSTORE_CRC32_H
-#define COUCHSTORE_CRC32_H 1
+#pragma once
 
 #include <sys/types.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+typedef enum {
+    CRC_UNKNOWN,
+    CRC32,
+    CRC32C
+} crc_mode_e;
 
-    uint32_t hash_crc32(const char *key, size_t key_length);
 
-#ifdef __cplusplus
-}
-#endif
+/*
+    Perform a CRC integrity on buf for buf_len bytes and compare against
+    checksum.
+    mode selects which CRC32 should be used.
+*/
+int perform_integrity_check(const uint8_t* buf,
+                            size_t buf_len,
+                            uint32_t checksum,
+                            crc_mode_e mode);
 
-#endif
+/*
+    Get the checksum for buf/buf_len
+    mode selects which CRC to use.
+     - CRC_UNKNOWN is illegal and will assert if used.
+*/
+uint32_t get_checksum(const uint8_t* buf,
+                      size_t buf_len,
+                      crc_mode_e mode);
+
