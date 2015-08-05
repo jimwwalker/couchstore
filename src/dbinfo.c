@@ -43,6 +43,9 @@ static int process_file(const char *file)
     couchstore_error_t errcode;
     uint64_t btreesize = 0;
     int iterate_headers = getenv("ITERATE_HEADERS") != NULL;
+    const char* crc_strings[3] = {"warning crc is set to unknown",
+                                  "CRC-32",
+                                  "CRC-32C"};
 
     errcode = couchstore_open_db(file, COUCHSTORE_OPEN_FLAG_RDONLY, &db);
     if (errcode != COUCHSTORE_SUCCESS) {
@@ -55,6 +58,13 @@ next_header:
     printf("DB Info (%s) - header at %"PRIu64"\n", file, db->header.position);
     printf("   file format version: %"PRIu64"\n", db->header.disk_version);
     printf("   update_seq: %"PRIu64"\n", db->header.update_seq);
+
+    if (db->file.crc_mode < 3) {
+        printf("   crc: %s\n", crc_strings[db->file.crc_mode]);
+    } else {
+        printf("   crc: warning crc_mode is out of range %"PRIu32"\n",  db->file.crc_mode);
+    }
+
     print_db_info(db);
     if (db->header.by_id_root) {
         btreesize += db->header.by_id_root->subtreesize;
