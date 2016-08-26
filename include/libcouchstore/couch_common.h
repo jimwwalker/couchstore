@@ -40,7 +40,8 @@ extern "C" {
         COUCH_DOC_INVALID_JSON = 1, /**< Document was checked, and was not valid JSON */
         COUCH_DOC_INVALID_JSON_KEY = 2, /**< Document was checked, and contained reserved keys,
                                              was not inserted as JSON. */
-        COUCH_DOC_NON_JSON_MODE = 3 /**< Document was not checked (DB running in non-JSON mode) */
+        COUCH_DOC_NON_JSON_MODE = 3, /**< Document was not checked (DB running in non-JSON mode) */
+        COUCH_DOC_IS_META_EVENT = 4 /**< Document represents an event */
     };
 
     typedef enum {
