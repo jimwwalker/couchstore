@@ -1268,6 +1268,7 @@ couchstore_error_t couchstore_save_local_document(Db *db, LocalDoc *lDoc)
 {
     couchstore_error_t errcode;
     couchfile_modify_action ldupdate;
+    couchfile_modify_request rq;
     node_pointer *nroot = NULL;
     error_unless(!db->dropped, COUCHSTORE_ERROR_FILE_CLOSED);
 
@@ -1280,7 +1281,6 @@ couchstore_error_t couchstore_save_local_document(Db *db, LocalDoc *lDoc)
     ldupdate.key = &lDoc->id;
     ldupdate.value.data = &lDoc->json;
 
-    couchfile_modify_request rq;
     rq.cmp.compare = ebin_cmp;
     rq.num_actions = 1;
     rq.actions = &ldupdate;

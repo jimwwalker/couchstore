@@ -93,6 +93,7 @@ extern "C" {
             sized_buf *data;
             void *arg;
         } value;
+        sized_buf* seq;
     } couchfile_modify_action;
 
     /* Guided purge related constants */
@@ -106,6 +107,24 @@ extern "C" {
     typedef int (*purge_kv_fn)(const sized_buf *key, const sized_buf *val, void *ctx);
 
     typedef struct couchfile_modify_request {
+        couchfile_modify_request()
+            : file(nullptr),
+              num_actions(0),
+              actions(nullptr),
+              fetch_callback(nullptr),
+              reduce(nullptr),
+              rereduce(nullptr),
+              user_reduce_ctx(nullptr),
+              purge_kp(nullptr),
+              purge_kv(nullptr),
+              enable_purging(0),
+              guided_purge_ctx(nullptr),
+              compacting(0),
+              kv_chunk_threshold(0),
+              kp_chunk_threshold(0),
+              save_callback(nullptr),
+              save_callback_ctx(nullptr) {
+        }
         compare_info cmp;
         tree_file *file;
         int num_actions;
@@ -123,6 +142,8 @@ extern "C" {
         int compacting;
         int kv_chunk_threshold;
         int kp_chunk_threshold;
+        save_callback_fn save_callback;
+        void* save_callback_ctx;
     } couchfile_modify_request;
 
 #define KP_NODE 0

@@ -449,6 +449,14 @@ static couchstore_error_t modify_node(couchfile_modify_request *rq,
                     case ACTION_INSERT:
                         local_result->modified = 1;
                         mr_push_item(rq->actions[start].key, rq->actions[start].value.data, local_result);
+                        if (rq->save_callback) {
+                            const auto* seq_buf = rq->actions[start].seq;
+                            (*rq->save_callback)(rq->actions[start].key,
+                                                 decode_sequence_key(seq_buf),
+                                                 0,
+                                                 COUCHSTORE_ADDED,
+                                                 rq->save_callback_ctx);
+                        }
                         break;
 
                     case ACTION_REMOVE:
@@ -470,6 +478,15 @@ static couchstore_error_t modify_node(couchfile_modify_request *rq,
                     case ACTION_INSERT:
                         local_result->modified = 1;
                         mr_push_item(rq->actions[start].key, rq->actions[start].value.data, local_result);
+                        if (rq->save_callback) {
+                            const raw_id_index_value *raw = (raw_id_index_value*) val_buf.buf;
+                            const auto* seq_buf = rq->actions[start].seq;
+                            (*rq->save_callback)(rq->actions[start].key,
+                                                 decode_sequence_key(seq_buf),
+                                                 decode_raw48(raw->db_seq),
+                                                 COUCHSTORE_REPLACED,
+                                                 rq->save_callback_ctx);
+                        }
                         break;
 
                     case ACTION_REMOVE:
@@ -502,6 +519,14 @@ static couchstore_error_t modify_node(couchfile_modify_request *rq,
             case ACTION_INSERT:
                 local_result->modified = 1;
                 mr_push_item(rq->actions[start].key, rq->actions[start].value.data, local_result);
+                if (rq->save_callback) {
+                    const auto* seq_buf = rq->actions[start].seq;
+                    (*rq->save_callback)(rq->actions[start].key,
+                                         decode_sequence_key(seq_buf),
+                                         0,
+                                         COUCHSTORE_ADDED,
+                                         rq->save_callback_ctx);
+                }
                 break;
 
             case ACTION_REMOVE:
