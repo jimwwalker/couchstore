@@ -91,6 +91,8 @@ public:
     **/
     static int checkCallback(Db* db, DocInfo* info, void* ctx);
 
+    static int dumpCallback(Db* db, DocInfo* info, void* ctx);
+
     /**
         Couchstore callback method that just counts the number of callbacks.
     **/

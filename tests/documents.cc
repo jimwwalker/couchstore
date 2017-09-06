@@ -136,6 +136,8 @@ int Documents::checkCallback(Db* db, DocInfo* info, void* ctx) {
 
     Doc* doc = ds->getDoc(ds->getPosition());
     DocInfo* docInfo = ds->getDocInfo(ds->getPosition());
+    std::string name(docInfo->id.buf, docInfo->id.size);
+    std::cout << name << std::endl;
 
     EXPECT_EQ(0, std::memcmp(info->id.buf, docInfo->id.buf, info->id.size));
     EXPECT_EQ(0, std::memcmp(info->rev_meta.buf, docInfo->rev_meta.buf, info->rev_meta.size));
@@ -160,6 +162,15 @@ int Documents::checkCallback(Db* db, DocInfo* info, void* ctx) {
     if (openDoc) {
         couchstore_free_document(openDoc);
     }
+    return 0;
+}
+
+int Documents::dumpCallback(Db* db, DocInfo* info, void* ctx) {
+
+    std::string name(info->id.buf, info->id.size);
+    std::cout << "name:" << name << " seqno:" << info->db_seq << " deleted:" << info->deleted << std::endl;
+
+
     return 0;
 }
 
