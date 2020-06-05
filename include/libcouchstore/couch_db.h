@@ -793,6 +793,17 @@ extern "C" {
     LIBCOUCHSTORE_API
     couchstore_error_t couchstore_save_local_document(Db *db, LocalDoc *lDoc);
 
+    /**
+     * Save multiple local docs to the db. see couchstore_save_local_document
+     *
+     * @param db the database to store the document in
+     * @param documents the documents to store/delete
+     * @return COUCHSTORE_SUCCESS on success
+     */
+    LIBCOUCHSTORE_API
+    couchstore_error_t couchstore_save_local_documents(
+            Db* db, std::vector<LocalDoc*>& documents);
+
     /*
      * Free all allocated resources from a LocalDoc obtained from
      * couchstore_open_local_document().
